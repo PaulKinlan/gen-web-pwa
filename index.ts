@@ -50,4 +50,4 @@ app.get("/api/generate", async (c: Context) => {
 // Serve static files from frontend directory
 app.get("/*", serveStatic({ root: "./frontend" }));
 
-export default app.fetch;
+Deno.serve(app.fetch);
