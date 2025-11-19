@@ -22,7 +22,7 @@ app.get("/api/generate", async (c: Context) => {
   console.log("Received query:", query);
   const webSchemeUrl = new URL(query);
 
-  const { origin: agent, pathname: agentQuery } = webSchemeUrl;
+  const { hostname: agent, pathname: agentQuery } = webSchemeUrl;
 
   console.log("Agent:", agent);
   console.log("Agent Query:", agentQuery);
