@@ -24,6 +24,9 @@ app.get("/api/generate", async (c: Context) => {
 
   const { origin: agent, pathname: agentQuery } = webSchemeUrl;
 
+  console.log("Agent:", agent);
+  console.log("Agent Query:", agentQuery);
+
   if (agent == null || agentQuery == null) {
     return c.json({ error: "Agent and agentQuery are required" }, 400);
   }
