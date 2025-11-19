@@ -18,6 +18,8 @@ app.onError((err: Error, c: Context) => {
 
 app.get("/api/generate", async (c: Context) => {
   const { query } = c.req.query();
+
+  console.log("Received query:", query);
   const webSchemeUrl = new URL(query);
 
   const { origin: agent, pathname: agentQuery } = webSchemeUrl;
