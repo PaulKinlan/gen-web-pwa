@@ -151,6 +151,15 @@ app.get("/api/generate", async (c: Context) => {
   return new Response(htmlStream);
 });
 
+// Serve static files with proper MIME types
+app.get("*.tsx", async (c: Context) => {
+  const path = c.req.path.slice(1); // Remove leading slash
+  const content = await Deno.readTextFile(`./frontend/${path}`);
+  return c.text(content, 200, {
+    "Content-Type": "application/javascript; charset=utf-8",
+  });
+});
+
 // Serve static files from frontend directory
 app.get("/*", serveStatic({ root: "./frontend" }));
 
