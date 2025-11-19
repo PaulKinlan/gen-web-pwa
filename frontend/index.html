@@ -10,13 +10,40 @@
 </head>
 
 <body class="bg-gray-100 text-gray-800">
-  <div id="root" class="container mx-auto p-4">
+  <div class="container mx-auto p-4 max-w-2xl">
     <h1 class="text-4xl font-bold mb-4">Gen Web</h1>
-    <p>Welcome to Gen Web. Use a <code class="bg-gray-200 p-1 rounded">web+gen://</code> URL to generate a site.</p>
-    <p>For example: <a href="web+gen://nike.com/plan-a-hike" class="text-blue-500">web+gen://nike.com/plan-a-hike</a>
+    <p class="mb-4">Welcome to Gen Web. Use a <code class="bg-gray-200 px-2 py-1 rounded">web+gen://</code> URL to
+      generate a site.</p>
+    <p class="mb-6">For example: <a href="web+gen://nike.com/plan-a-hike"
+        class="text-blue-500 hover:underline">web+gen://nike.com/plan-a-hike</a>
     </p>
+
+    <!-- Install Prompt Section -->
+    <div id="install-section" style="display: none;" class="mt-8 p-6 bg-blue-50 border-2 border-blue-200 rounded-lg">
+      <h2 class="text-2xl font-semibold mb-2">Install Gen Web</h2>
+      <p class="mb-4 text-gray-700">
+        Install Gen Web as a Progressive Web App for a better experience. You'll be able to:
+      </p>
+      <ul class="list-disc list-inside mb-4 text-gray-700">
+        <li>Access it directly from your home screen</li>
+        <li>Use it offline</li>
+        <li>Register it as a handler for <code class="bg-gray-200 px-1 rounded">web+gen://</code> URLs</li>
+      </ul>
+      <button onclick="installPWA()"
+        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors cursor-pointer">
+        Install Now
+      </button>
+    </div>
+
+    <!-- Fallback message -->
+    <div id="no-install-section" class="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+      <p class="text-gray-600">
+        <strong>Note:</strong> This app can be installed as a PWA. The install option will appear when available on your
+        device.
+      </p>
+    </div>
   </div>
-  <script type="module" src="/index.tsx"></script>
+  <script src="/install.js"></script>
 </body>
 
 </html>
