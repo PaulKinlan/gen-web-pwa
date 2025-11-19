@@ -16,6 +16,49 @@ app.onError((err: Error, c: Context) => {
   throw err;
 });
 
+// Helper function to create a transform stream that extracts HTML from markdown code blocks
+function createHtmlExtractorStream(): TransformStream<string, string> {
+  let buffer = "";
+  let insideCodeBlock = false;
+  let htmlStarted = false;
+
+  return new TransformStream({
+    transform(chunk, controller) {
+      buffer += chunk;
+
+      // Check for opening code fence
+      if (!insideCodeBlock && buffer.includes("```html")) {
+        const htmlStartIndex = buffer.indexOf("```html") + 7; // Length of "```html"
+        buffer = buffer.slice(htmlStartIndex);
+        insideCodeBlock = true;
+        htmlStarted = true;
+      }
+
+      // Check for closing code fence
+      if (insideCodeBlock && buffer.includes("```")) {
+        const endIndex = buffer.indexOf("```");
+        const htmlContent = buffer.slice(0, endIndex);
+        controller.enqueue(htmlContent);
+        buffer = ""; // Clear buffer after extraction
+        insideCodeBlock = false;
+        return;
+      }
+
+      // If we're inside the code block, emit the content
+      if (htmlStarted && insideCodeBlock) {
+        controller.enqueue(buffer);
+        buffer = "";
+      }
+    },
+    flush(controller) {
+      // Emit any remaining buffer content if we're inside a code block
+      if (insideCodeBlock && buffer) {
+        controller.enqueue(buffer);
+      }
+    },
+  });
+}
+
 app.get("/api/generate", async (c: Context) => {
   const { query } = c.req.query();
 
@@ -52,10 +95,60 @@ app.get("/api/generate", async (c: Context) => {
     prompt: finalPrompt,
   });
 
-  c.set("X-Stream-Id", result.id);
-  c.set("Content-Type", "text/html; charset=utf-8");
+  // Get the text stream from the AI SDK result
+  const textStream = result.toTextStreamResponse();
+  const reader = textStream.body?.getReader();
 
-  return result.toTextStreamResponse();
+  if (!reader) {
+    return c.json({ error: "Failed to create stream reader" }, 500);
+  }
+
+  // Create a new readable stream that extracts HTML from markdown
+  const htmlStream = new ReadableStream({
+    async start(controller) {
+      const decoder = new TextDecoder();
+      const htmlExtractor = createHtmlExtractorStream();
+      const writer = htmlExtractor.writable.getWriter();
+      const extractedReader = htmlExtractor.readable.getReader();
+
+      // Pipe the AI stream through the extractor
+      const readPromise = (async () => {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              await writer.close();
+              break;
+            }
+            const text = decoder.decode(value, { stream: true });
+            await writer.write(text);
+          }
+        } catch (error) {
+          console.error("Error reading stream:", error);
+          await writer.abort(error);
+        }
+      })();
+
+      // Read from the extractor and send to response
+      try {
+        while (true) {
+          const { done, value } = await extractedReader.read();
+          if (done) break;
+          controller.enqueue(new TextEncoder().encode(value));
+        }
+      } catch (error) {
+        console.error("Error in extractor stream:", error);
+      }
+
+      await readPromise;
+      controller.close();
+    },
+  });
+
+  c.header("X-Stream-Id", result.id);
+  c.header("Content-Type", "text/html; charset=utf-8");
+
+  return new Response(htmlStream);
 });
 
 // Serve static files from frontend directory
