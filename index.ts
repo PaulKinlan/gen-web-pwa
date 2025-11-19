@@ -48,7 +48,7 @@ app.get("/api/generate", async (c: Context) => {
   const finalPrompt = `${systemPrompt}\n\n**Brand Guidelines:**\n${brandPrompt}\n\n**Website Goal:**\n${sitePrompt}\n\n**User Query:**\n${query}`;
 
   const result = await streamText({
-    model: google("models/gemini-pro"),
+    model: google("gemini-2.5-flash"),
     prompt: finalPrompt,
   });
 
