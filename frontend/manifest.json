@@ -15,7 +15,10 @@
   "protocol_handlers": [
     {
       "protocol": "web+gen",
-      "url": "/%s"
+      "url": "/api/generate?query=%s"
     }
-  ]
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
 }

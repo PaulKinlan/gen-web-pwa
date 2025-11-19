@@ -6,7 +6,7 @@ import { streamText } from "npm:ai";
 import { createGoogleGenerativeAI } from "npm:@ai-sdk/google";
 
 const google = createGoogleGenerativeAI({
-  apiKey: Deno.env.get("GOOGLE_API_KEY"),
+  apiKey: Deno.env.get("GEMINI_API_KEY") || "",
 });
 
 const app = new Hono();
@@ -17,10 +17,13 @@ app.onError((err: Error, c: Context) => {
 });
 
 app.get("/api/generate", async (c: Context) => {
-  const { agent, query } = c.req.query();
+  const { query } = c.req.query();
+  const webSchemeUrl = new URL(query);
 
-  if (!agent || !query) {
-    return c.json({ error: "Agent and query are required" }, 400);
+  const { origin: agent, pathname: agentQuery } = webSchemeUrl;
+
+  if (agent == null || agentQuery == null) {
+    return c.json({ error: "Agent and agentQuery are required" }, 400);
   }
 
   const agents = await Deno.readTextFile("./backend/agents.json").then(
@@ -43,6 +46,9 @@ app.get("/api/generate", async (c: Context) => {
     model: google("models/gemini-pro"),
     prompt: finalPrompt,
   });
+
+  c.set("X-Stream-Id", result.id);
+  c.set("Content-Type", "text/html; charset=utf-8");
 
   return result.toTextStreamResponse();
 });
