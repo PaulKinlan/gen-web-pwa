@@ -4,7 +4,6 @@ import { serveStatic } from "npm:hono/deno";
 import type { Context } from "npm:hono";
 import { streamText } from "npm:ai";
 import { createGoogleGenerativeAI } from "npm:@ai-sdk/google";
-import { serveFile } from "https://esm.town/v/std/utils/index.ts";
 
 const google = createGoogleGenerativeAI({
   apiKey: Deno.env.get("GOOGLE_API_KEY"),
@@ -48,7 +47,7 @@ app.get("/api/generate", async (c: Context) => {
   return result.toTextStreamResponse();
 });
 
-app.get("/", (c: Context) => serveFile("frontend/index.html"));
-app.get("/*", (c: Context) => serveFile("frontend/" + c.req.path.substring(1)));
+// Serve static files from frontend directory
+app.get("/*", serveStatic({ root: "./frontend" }));
 
 export default app.fetch;
