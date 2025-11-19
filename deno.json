@@ -2,12 +2,10 @@
   "tasks": {
     "dev": "deno run --allow-net --allow-read --allow-env --watch backend/index.ts"
   },
-  "importMap": {
-    "imports": {
-      "hono/": "https://deno.land/x/hono@v4.2.7/",
-      "react": "https://esm.sh/react@18.2.0",
-      "react-dom": "https://esm.sh/react-dom@18.2.0"
-    }
+  "imports": {
+    "hono/": "https://deno.land/x/hono@v4.2.7/",
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom": "https://esm.sh/react-dom@18.2.0"
   },
   "fmt": {
     "options": {
